@@ -1,6 +1,10 @@
 package com.gateway;
 
+import PM10.Measurement;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.models.Node;
 
 import javax.ws.rs.*;
@@ -28,6 +32,32 @@ public class Gateway {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
         }
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    @POST
+    @Path("/stats")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response putStat(String message) {
+
+        JsonParser parser = new JsonParser();
+        JsonObject object = parser.parse(message).getAsJsonObject();
+
+        if ("globalStat".equals(object.get("requestType").getAsString())) {
+            Measurement toAdd = new Measurement(object.get("id").getAsString(), object.get("type").getAsString(),
+                    object.get("value").getAsDouble(), object.get("timestamp").getAsLong());
+
+            if (toAdd != null) {
+                if (Stats.getInstance().add(toAdd)) {
+                    String response = "{ \"status\" : \"done\", \"newStat\" : \"" + toAdd.toString() + "\", \"Stats\" : " + Stats.getInstance().getStatsList().toString() + " }";
+                    return Response.ok(response).build();
+                } else {
+                    return Response.status(Response.Status.PRECONDITION_FAILED).build();
+                }
+            }
+        }
+
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 

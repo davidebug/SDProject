@@ -10,12 +10,8 @@ public class NodeProcess {
     public static void main(String[] args) throws IOException {
 
         try {
-          //  NodeHandler nodeHandler = new NodeHandler();
-          //  nodeHandler.runInputThread();
-            PM10Simulator simulator = new PM10Simulator(StatsBuffer.getInstance());
-            simulator.run();
-
-
+            NodeHandler nodeHandler = new NodeHandler();
+            nodeHandler.runInputThread();
 
         } catch (Exception e) {
 

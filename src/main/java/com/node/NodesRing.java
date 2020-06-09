@@ -3,6 +3,7 @@ package com.node;
 import com.models.Node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NodesRing {
@@ -14,9 +15,8 @@ public class NodesRing {
         this.nodes = new ArrayList<Node>();
     }
 
-    //singleton
-    public synchronized static NodesRing getInstance(){
-        if(instance==null)
+    public synchronized static NodesRing getInstance() {
+        if (instance == null)
             instance = new NodesRing();
         return instance;
     }
@@ -25,24 +25,25 @@ public class NodesRing {
         return nodes;
     }
 
-    public void setNodes(List<Node> nodes) {
+    public synchronized void setNodes(List<Node> nodes) {
+        Collections.sort(nodes);
         this.nodes = nodes;
     }
 
-    public synchronized void addNode(Node node){
+    public synchronized void addNode(Node node) {
         List<Node> nodesCopy = nodes;
         nodesCopy.add(node);
-        // TODO: sorting nodesCopy.sort();
+        Collections.sort(nodesCopy);
         nodes = nodesCopy;
     }
 
-    public synchronized void removeNode(String id){
+    public synchronized void removeNode(String id) {
         List<Node> nodesCopy = nodes;
-        for(Node n : nodesCopy)
-            if(n.getId().equals(id))
+        for (Node n : nodesCopy)
+            if (n.getId().equals(id))
                 nodesCopy.remove(n);
-        // TODO: sorting nodesCopy.sort();
-            nodes = nodesCopy;
+        Collections.sort(nodesCopy);
+        nodes = nodesCopy;
     }
 
 

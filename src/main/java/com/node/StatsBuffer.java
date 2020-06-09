@@ -22,14 +22,17 @@ public class StatsBuffer implements Buffer {
             instance = new StatsBuffer();
         return instance;
     }
+
     @Override
     public synchronized void addMeasurement(Measurement m) {
         List<Measurement> statsCopy = stats;
         if(statsCopy.size() == slidingMaxSize) {
+            System.out.println("ARRIVATO A 12, calcolo AVG");
             localStat = getAvg();
-            //TODO: notify token thread
+            this.getInstance().notifyAll();
         }
         statsCopy.add(m);
+        stats = statsCopy;
         //System.out.println(m.toString());
     }
 

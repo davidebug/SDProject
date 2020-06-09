@@ -10,7 +10,7 @@ import java.util.Scanner;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Node {
+public class Node implements Comparable<Node>{
 
     String id;
     String IP;
@@ -53,4 +53,8 @@ public class Node {
         this.port = port;
     }
 
+    @Override
+    public int compareTo(Node o) {
+        return this.getId().compareTo(o.getId());
+    }
 }
