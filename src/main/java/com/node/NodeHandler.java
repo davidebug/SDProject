@@ -191,6 +191,7 @@ public class NodeHandler {
         currentToken.setNextIp(nextNode.getIP());
         currentToken.setNextPort(nextNode.getPort());
 
+
         //TODO: Mando il token a tutti
     }
 
