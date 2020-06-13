@@ -51,7 +51,7 @@ public class Nodes {
             }
         }
         nodesCopy.add(toAdd);
-        // TODO: nodesCopy.sort(Comparator.naturalOrder());
+        Collections.sort(nodesCopy);
         setNodesList(nodesCopy);
         return true;
 
@@ -63,7 +63,7 @@ public class Nodes {
         for(Node n: nodesCopy) {
             if (n.getId().toLowerCase().equals(id.toLowerCase())) {
                 nodesCopy.remove(n);
-                //TODO: sorting nodesCopy.sort();
+                Collections.sort(nodesCopy);
                 setNodesList(nodesCopy);
                 return true;
             }

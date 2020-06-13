@@ -1,0 +1,25 @@
+syntax = "proto3";
+option java_package = "com.grpc";
+
+service TokenHandler{
+  rpc HandleToken (TokenMessage) returns (TokenResponse);
+}
+
+message TokenMessage {
+
+  string currentId = 1;
+
+  map<string, MeasurementMessage> measurements = 2;
+  message MeasurementMessage {
+    double value = 1;
+    int64 timestamp = 2;
+
+  }
+
+
+}
+
+message TokenResponse {
+  string status = 1;
+  string message = 2;
+}

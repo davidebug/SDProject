@@ -14,9 +14,9 @@ public class Node implements Comparable<Node>{
 
     String id;
     String IP;
-    String port;
+    int port;
 
-    public Node(String id, String IP, String port){
+    public Node(String id, String IP, int port){
         this.id = id;
         this.IP = IP;
         this.port = port;
@@ -45,11 +45,11 @@ public class Node implements Comparable<Node>{
         this.IP = IP;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 

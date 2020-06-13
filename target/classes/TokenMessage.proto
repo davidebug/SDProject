@@ -1,24 +1,51 @@
 syntax = "proto3";
-option java_package = "java.com.util";
+option java_package = "com.grpc";
 
-service TokenHandler{
-  rpc SendToken (TokenMessage) returns (TokenResponse);
+service MessageHandler{
+  rpc HandleToken (TokenMessage) returns (TokenResponse);
+  rpc AddNode (NewNodeMessage) returns (NewNodeResponse);
+  rpc RemoveNode (RemoveNodeMessage) returns (RemoveNodeResponse);
 }
 
 message TokenMessage {
 
-  message Measurement {
+  string currentId = 1;
+
+  map<string, MeasurementMessage> measurements = 2;
+  message MeasurementMessage {
     double value = 1;
     int64 timestamp = 2;
 
   }
 
-  map<string, Measurement> measurements = 1;
+
+}
+
+message NewNodeMessage {
+
+  string id = 1;
+  int32 port = 2;
+  string IP = 3;
+
+}
+
+message RemoveNodeMessage {
+
+  string id = 1;
+
+}
+
+message NewNodeResponse{
+  string status = 1;
+  string message = 2;
+}
+
+message RemoveNodeResponse{
+  string status = 1;
+  string message = 2;
 }
 
 message TokenResponse {
   string status = 1;
   string message = 2;
 }
-
-//protoc --plugin=protoc-gen-grpc-java=build/exe/java_plugin/protoc-gen-grpc-java --grpc-java_out=src/main --proto_path=src/main/proto TokenMessage.proto
