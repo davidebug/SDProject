@@ -13,6 +13,16 @@ public class Token {
     String nextIp;
     int nextPort;
     String currentId;
+    String nextId;
+
+    public synchronized String getNextId() {
+        return nextId;
+    }
+
+    public synchronized void setNextId(String nextId) {
+        this.nextId = nextId;
+    }
+
     private static Token instance;
     Map<String, Measurement> measurements;
 
@@ -81,6 +91,7 @@ public class Token {
                 map.put(entry.getKey(),measurement);
             }
         }
+        setMeasurements(map);
     }
 
     Token(){

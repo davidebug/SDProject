@@ -29,11 +29,21 @@ public final class TokenMessageOuterClass {
         getCurrentIdBytes();
 
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>string nextId = 2;</code>
+     */
+    java.lang.String getNextId();
+    /**
+     * <code>string nextId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getNextIdBytes();
+
+    /**
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
     int getMeasurementsCount();
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
     boolean containsMeasurements(
         java.lang.String key);
@@ -44,19 +54,19 @@ public final class TokenMessageOuterClass {
     java.util.Map<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage>
     getMeasurements();
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
     java.util.Map<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage>
     getMeasurementsMap();
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrDefault(
         java.lang.String key,
         com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage defaultValue);
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrThrow(
@@ -76,6 +86,7 @@ public final class TokenMessageOuterClass {
     }
     private TokenMessage() {
       currentId_ = "";
+      nextId_ = "";
     }
 
     @java.lang.Override
@@ -113,10 +124,16 @@ public final class TokenMessageOuterClass {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              nextId_ = s;
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 measurements_ = com.google.protobuf.MapField.newMapField(
                     MeasurementsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000004;
               }
               com.google.protobuf.MapEntry<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage>
               measurements__ = input.readMessage(
@@ -146,7 +163,7 @@ public final class TokenMessageOuterClass {
     protected com.google.protobuf.MapField internalGetMapField(
         int number) {
       switch (number) {
-        case 2:
+        case 3:
           return internalGetMeasurements();
         default:
           throw new RuntimeException(
@@ -710,7 +727,41 @@ public final class TokenMessageOuterClass {
       }
     }
 
-    public static final int MEASUREMENTS_FIELD_NUMBER = 2;
+    public static final int NEXTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object nextId_;
+    /**
+     * <code>string nextId = 2;</code>
+     */
+    public java.lang.String getNextId() {
+      java.lang.Object ref = nextId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nextId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string nextId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNextIdBytes() {
+      java.lang.Object ref = nextId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nextId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MEASUREMENTS_FIELD_NUMBER = 3;
     private static final class MeasurementsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
           java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage> defaultEntry =
@@ -737,7 +788,7 @@ public final class TokenMessageOuterClass {
       return internalGetMeasurements().getMap().size();
     }
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     public boolean containsMeasurements(
@@ -753,14 +804,14 @@ public final class TokenMessageOuterClass {
       return getMeasurementsMap();
     }
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     public java.util.Map<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage> getMeasurementsMap() {
       return internalGetMeasurements().getMap();
     }
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     public com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrDefault(
@@ -772,7 +823,7 @@ public final class TokenMessageOuterClass {
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
-     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+     * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
      */
 
     public com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrThrow(
@@ -801,12 +852,15 @@ public final class TokenMessageOuterClass {
       if (!getCurrentIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, currentId_);
       }
+      if (!getNextIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextId_);
+      }
       com.google.protobuf.GeneratedMessageV3
         .serializeStringMapTo(
           output,
           internalGetMeasurements(),
           MeasurementsDefaultEntryHolder.defaultEntry,
-          2);
+          3);
       unknownFields.writeTo(output);
     }
 
@@ -818,6 +872,9 @@ public final class TokenMessageOuterClass {
       if (!getCurrentIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, currentId_);
       }
+      if (!getNextIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextId_);
+      }
       for (java.util.Map.Entry<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage> entry
            : internalGetMeasurements().getMap().entrySet()) {
         com.google.protobuf.MapEntry<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage>
@@ -826,7 +883,7 @@ public final class TokenMessageOuterClass {
             .setValue(entry.getValue())
             .build();
         size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(2, measurements__);
+            .computeMessageSize(3, measurements__);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -846,6 +903,8 @@ public final class TokenMessageOuterClass {
       boolean result = true;
       result = result && getCurrentId()
           .equals(other.getCurrentId());
+      result = result && getNextId()
+          .equals(other.getNextId());
       result = result && internalGetMeasurements().equals(
           other.internalGetMeasurements());
       result = result && unknownFields.equals(other.unknownFields);
@@ -861,6 +920,8 @@ public final class TokenMessageOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + CURRENTID_FIELD_NUMBER;
       hash = (53 * hash) + getCurrentId().hashCode();
+      hash = (37 * hash) + NEXTID_FIELD_NUMBER;
+      hash = (53 * hash) + getNextId().hashCode();
       if (!internalGetMeasurements().getMap().isEmpty()) {
         hash = (37 * hash) + MEASUREMENTS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetMeasurements().hashCode();
@@ -974,7 +1035,7 @@ public final class TokenMessageOuterClass {
       protected com.google.protobuf.MapField internalGetMapField(
           int number) {
         switch (number) {
-          case 2:
+          case 3:
             return internalGetMeasurements();
           default:
             throw new RuntimeException(
@@ -985,7 +1046,7 @@ public final class TokenMessageOuterClass {
       protected com.google.protobuf.MapField internalGetMutableMapField(
           int number) {
         switch (number) {
-          case 2:
+          case 3:
             return internalGetMutableMeasurements();
           default:
             throw new RuntimeException(
@@ -1018,6 +1079,8 @@ public final class TokenMessageOuterClass {
         super.clear();
         currentId_ = "";
 
+        nextId_ = "";
+
         internalGetMutableMeasurements().clear();
         return this;
       }
@@ -1044,6 +1107,7 @@ public final class TokenMessageOuterClass {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         result.currentId_ = currentId_;
+        result.nextId_ = nextId_;
         result.measurements_ = internalGetMeasurements();
         result.measurements_.makeImmutable();
         result.bitField0_ = to_bitField0_;
@@ -1090,6 +1154,10 @@ public final class TokenMessageOuterClass {
         if (other == com.grpc.TokenMessageOuterClass.TokenMessage.getDefaultInstance()) return this;
         if (!other.getCurrentId().isEmpty()) {
           currentId_ = other.currentId_;
+          onChanged();
+        }
+        if (!other.getNextId().isEmpty()) {
+          nextId_ = other.nextId_;
           onChanged();
         }
         internalGetMutableMeasurements().mergeFrom(
@@ -1191,6 +1259,75 @@ public final class TokenMessageOuterClass {
         return this;
       }
 
+      private java.lang.Object nextId_ = "";
+      /**
+       * <code>string nextId = 2;</code>
+       */
+      public java.lang.String getNextId() {
+        java.lang.Object ref = nextId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nextId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string nextId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNextIdBytes() {
+        java.lang.Object ref = nextId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nextId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string nextId = 2;</code>
+       */
+      public Builder setNextId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        nextId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string nextId = 2;</code>
+       */
+      public Builder clearNextId() {
+        
+        nextId_ = getDefaultInstance().getNextId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string nextId = 2;</code>
+       */
+      public Builder setNextIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        nextId_ = value;
+        onChanged();
+        return this;
+      }
+
       private com.google.protobuf.MapField<
           java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage> measurements_;
       private com.google.protobuf.MapField<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage>
@@ -1218,7 +1355,7 @@ public final class TokenMessageOuterClass {
         return internalGetMeasurements().getMap().size();
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public boolean containsMeasurements(
@@ -1234,14 +1371,14 @@ public final class TokenMessageOuterClass {
         return getMeasurementsMap();
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public java.util.Map<java.lang.String, com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage> getMeasurementsMap() {
         return internalGetMeasurements().getMap();
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrDefault(
@@ -1253,7 +1390,7 @@ public final class TokenMessageOuterClass {
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public com.grpc.TokenMessageOuterClass.TokenMessage.MeasurementMessage getMeasurementsOrThrow(
@@ -1273,7 +1410,7 @@ public final class TokenMessageOuterClass {
         return this;
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public Builder removeMeasurements(
@@ -1292,7 +1429,7 @@ public final class TokenMessageOuterClass {
         return internalGetMutableMeasurements().getMutableMap();
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
       public Builder putMeasurements(
           java.lang.String key,
@@ -1304,7 +1441,7 @@ public final class TokenMessageOuterClass {
         return this;
       }
       /**
-       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 2;</code>
+       * <code>map&lt;string, .TokenMessage.MeasurementMessage&gt; measurements = 3;</code>
        */
 
       public Builder putAllMeasurements(
@@ -4632,24 +4769,24 @@ public final class TokenMessageOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022TokenMessage.proto\"\347\001\n\014TokenMessage\022\021\n" +
-      "\tcurrentId\030\001 \001(\t\0225\n\014measurements\030\002 \003(\0132\037" +
-      ".TokenMessage.MeasurementsEntry\032U\n\021Measu" +
-      "rementsEntry\022\013\n\003key\030\001 \001(\t\022/\n\005value\030\002 \001(\013" +
-      "2 .TokenMessage.MeasurementMessage:\0028\001\0326" +
-      "\n\022MeasurementMessage\022\r\n\005value\030\001 \001(\001\022\021\n\tt" +
-      "imestamp\030\002 \001(\003\"6\n\016NewNodeMessage\022\n\n\002id\030\001" +
-      " \001(\t\022\014\n\004port\030\002 \001(\005\022\n\n\002IP\030\003 \001(\t\"\037\n\021Remove" +
-      "NodeMessage\022\n\n\002id\030\001 \001(\t\"2\n\017NewNodeRespon" +
-      "se\022\016\n\006status\030\001 \001(\t\022\017\n\007message\030\002 \001(\t\"5\n\022R",
-      "emoveNodeResponse\022\016\n\006status\030\001 \001(\t\022\017\n\007mes" +
-      "sage\030\002 \001(\t\"0\n\rTokenResponse\022\016\n\006status\030\001 " +
-      "\001(\t\022\017\n\007message\030\002 \001(\t2\243\001\n\016MessageHandler\022" +
-      ",\n\013HandleToken\022\r.TokenMessage\032\016.TokenRes" +
-      "ponse\022,\n\007AddNode\022\017.NewNodeMessage\032\020.NewN" +
-      "odeResponse\0225\n\nRemoveNode\022\022.RemoveNodeMe" +
-      "ssage\032\023.RemoveNodeResponseB\n\n\010com.grpcb\006" +
-      "proto3"
+      "\n\022TokenMessage.proto\"\367\001\n\014TokenMessage\022\021\n" +
+      "\tcurrentId\030\001 \001(\t\022\016\n\006nextId\030\002 \001(\t\0225\n\014meas" +
+      "urements\030\003 \003(\0132\037.TokenMessage.Measuremen" +
+      "tsEntry\032U\n\021MeasurementsEntry\022\013\n\003key\030\001 \001(" +
+      "\t\022/\n\005value\030\002 \001(\0132 .TokenMessage.Measurem" +
+      "entMessage:\0028\001\0326\n\022MeasurementMessage\022\r\n\005" +
+      "value\030\001 \001(\001\022\021\n\ttimestamp\030\002 \001(\003\"6\n\016NewNod" +
+      "eMessage\022\n\n\002id\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\n\n\002IP" +
+      "\030\003 \001(\t\"\037\n\021RemoveNodeMessage\022\n\n\002id\030\001 \001(\t\"" +
+      "2\n\017NewNodeResponse\022\016\n\006status\030\001 \001(\t\022\017\n\007me",
+      "ssage\030\002 \001(\t\"5\n\022RemoveNodeResponse\022\016\n\006sta" +
+      "tus\030\001 \001(\t\022\017\n\007message\030\002 \001(\t\"0\n\rTokenRespo" +
+      "nse\022\016\n\006status\030\001 \001(\t\022\017\n\007message\030\002 \001(\t2\243\001\n" +
+      "\016MessageHandler\022,\n\013HandleToken\022\r.TokenMe" +
+      "ssage\032\016.TokenResponse\022,\n\007AddNode\022\017.NewNo" +
+      "deMessage\032\020.NewNodeResponse\0225\n\nRemoveNod" +
+      "e\022\022.RemoveNodeMessage\032\023.RemoveNodeRespon" +
+      "seB\n\n\010com.grpcb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4668,7 +4805,7 @@ public final class TokenMessageOuterClass {
     internal_static_TokenMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TokenMessage_descriptor,
-        new java.lang.String[] { "CurrentId", "Measurements", });
+        new java.lang.String[] { "CurrentId", "NextId", "Measurements", });
     internal_static_TokenMessage_MeasurementsEntry_descriptor =
       internal_static_TokenMessage_descriptor.getNestedTypes().get(0);
     internal_static_TokenMessage_MeasurementsEntry_fieldAccessorTable = new

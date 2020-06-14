@@ -10,8 +10,9 @@ service MessageHandler{
 message TokenMessage {
 
   string currentId = 1;
+  string nextId = 2;
 
-  map<string, MeasurementMessage> measurements = 2;
+  map<string, MeasurementMessage> measurements = 3;
   message MeasurementMessage {
     double value = 1;
     int64 timestamp = 2;

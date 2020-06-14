@@ -1,5 +1,7 @@
 package grpc;
 
+import com.models.Node;
+import com.node.NodesRing;
 import com.node.Token;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -9,6 +11,8 @@ import com.grpc.MessageHandlerGrpc;
 import com.grpc.MessageHandlerGrpc.*;
 import com.grpc.TokenMessageOuterClass.*;
 
+import java.util.List;
+
 public class MessageHandlerGrpcClient {
 
     public static void sendToken(){
@@ -17,7 +21,8 @@ public class MessageHandlerGrpcClient {
 
         MessageHandlerStub stub = MessageHandlerGrpc.newStub(channel);
 
-        TokenMessage request = TokenMessage.newBuilder().putAllMeasurements(Token.getInstance().getMeasurementMessage()).build();
+        TokenMessage request = TokenMessage.newBuilder().putAllMeasurements(Token.getInstance().getMeasurementMessage()).
+                setCurrentId(Token.getInstance().getCurrentId()).setNextId(Token.getInstance().getNextId()).build();
 
         stub.handleToken(request, new StreamObserver<TokenResponse>() {
             @Override
@@ -39,60 +44,64 @@ public class MessageHandlerGrpcClient {
 
     }
 
-    public static void addNode(String id, String IP, int port){
+    public static void addNode( String id, String IP, int port){
 
-        //TODO: targets??
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget("").usePlaintext(true).build();
+        for(Node n : NodesRing.getInstance().getNodes()) {
+            if(!n.getId().equals(id)) {
+                final ManagedChannel channel = ManagedChannelBuilder.forTarget(n.getIP() + ":" + n.getPort()).usePlaintext(true).build();
 
-        MessageHandlerStub stub = MessageHandlerGrpc.newStub(channel);
+                MessageHandlerStub stub = MessageHandlerGrpc.newStub(channel);
 
-        NewNodeMessage request = NewNodeMessage.newBuilder().setId(id).setIP(IP).setPort(port).build();
+                NewNodeMessage request = NewNodeMessage.newBuilder().setId(id).setIP(IP).setPort(port).build();
 
-        stub.addNode(request, new StreamObserver<NewNodeResponse>() {
-            @Override
-            public void onNext(NewNodeResponse newNodeResponse) {
-                System.out.println(newNodeResponse.getStatus());
+                stub.addNode(request, new StreamObserver<NewNodeResponse>() {
+                    @Override
+                    public void onNext(NewNodeResponse newNodeResponse) {
+                        System.out.println(newNodeResponse.getStatus());
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        System.out.println("Error on token" + throwable.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        channel.shutdownNow();
+                    }
+                });
             }
-
-            @Override
-            public void onError(Throwable throwable) {
-                System.out.println("Error on token" + throwable.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                channel.shutdownNow();
-            }
-        });
-
+        }
     }
 
     public static void removeNode(String id){
+        for(Node n : NodesRing.getInstance().getNodes()) {
+            if(!n.getId().equals(id)) {
+                final ManagedChannel channel = ManagedChannelBuilder.forTarget(n.getIP() + ":" + n.getPort()).usePlaintext(true).build();
 
-        //TODO: targets??
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget("").usePlaintext(true).build();
+                MessageHandlerStub stub = MessageHandlerGrpc.newStub(channel);
 
-        MessageHandlerStub stub = MessageHandlerGrpc.newStub(channel);
+                RemoveNodeMessage request = RemoveNodeMessage.newBuilder().setId(id).build();
 
-        RemoveNodeMessage request = RemoveNodeMessage.newBuilder().setId(id).build();
+                stub.removeNode(request, new StreamObserver<RemoveNodeResponse>() {
 
-        stub.removeNode(request, new StreamObserver<RemoveNodeResponse>() {
+                    @Override
+                    public void onNext(RemoveNodeResponse removeNodeResponse) {
+                        System.out.println(removeNodeResponse.getStatus());
+                    }
 
-            @Override
-            public void onNext(RemoveNodeResponse removeNodeResponse) {
-                System.out.println(removeNodeResponse.getStatus());
+                    @Override
+                    public void onError(Throwable throwable) {
+                        System.out.println("Error on token" + throwable.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        channel.shutdownNow();
+                    }
+                });
             }
-
-            @Override
-            public void onError(Throwable throwable) {
-                System.out.println("Error on token" + throwable.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                channel.shutdownNow();
-            }
-        });
-
+        }
+        System.out.println("Done - deleted on Nodes");
     }
 }

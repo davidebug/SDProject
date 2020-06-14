@@ -25,19 +25,58 @@ public class NodeHandler {
 
     Node myNode;
     String gatewayIP;
+
+    public Node getMyNode() {
+        return myNode;
+    }
+
+    public void setMyNode(Node myNode) {
+        this.myNode = myNode;
+    }
+
+    public String getGatewayIP() {
+        return gatewayIP;
+    }
+
+    public void setGatewayIP(String gatewayIP) {
+        this.gatewayIP = gatewayIP;
+    }
+
     Thread tokenThread;
     Thread inputThread;
     Simulator simulator;
 
-    NodeHandler() {
-        myNode = null;
 
-        tokenThread = new Thread(new Runnable() {
+    NodeHandler() {
+
+        inputThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                System.out.println("Init token thread");
-                while (true) {
-                    if (Token.getInstance().getCurrentId() == myNode.getId() || NodesRing.getInstance().getNodes().size() < 2) {
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Enter 'exit' to exit..");
+                String exit = scanner.next();
+                while (!exit.equals("exit")) {
+                    if (exit.equals("nodes")) {
+                        System.out.println(NodesRing.getInstance().getNodes().toString());
+                    }
+                    exit = scanner.next();
+                }
+                System.out.println("Terminating process...");
+                stopThreads();
+                System.out.println("Terminating Simulator...");
+                simulator.stopMeGently();
+                deleteNode(myNode.getId());
+            }
+        });
+
+
+        tokenThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                System.out.println("Init listener on Local Stat...");
+                while (NodesRing.getInstance().getStatus().equals("online")) {
+                    if (Token.getInstance().getCurrentId().equals(myNode.getId()) || NodesRing.getInstance().getNodes().size() < 2) {
                         try {
                             synchronized (StatsBuffer.getInstance()) {
                                 while (StatsBuffer.getInstance().getLocalStat() == null)
@@ -47,53 +86,24 @@ public class NodeHandler {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        System.out.println("inserisco");
+                        System.out.println("Local Stat Produced");
                         nextToken();
                         insertStat(StatsBuffer.getInstance().getLocalStat());
+                        System.out.println("Sending token to --> " + Token.getInstance().getNextId());
                         MessageHandlerGrpcClient.sendToken();
-
-                        StatsBuffer.getInstance().reset(); //resetto la stat locale a null
                         if (Token.getInstance().getMeasurements().size() == NodesRing.getInstance().getNodes().size())
                             sendGlobalStat();
+                        System.out.println("Resetting and Recalculating Local stat ...");
+                        Token.getInstance().getMeasurements().remove(myNode.getId());
+                        StatsBuffer.getInstance().reset();
                     }
-                }// lo passo agli altri
+                }
+                System.out.println("Token Thread terminated");
             }
+
         });
 
-        inputThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Scanner scanner = new Scanner(System.in);
-                System.out.print("Enter an id: ");
-                String id = scanner.next();
-                System.out.print("Enter your port: ");
-                int port = scanner.nextInt();
-                // System.out.print("Enter your ip: ");
-                // String myIP = scanner.next();
-                String myIP = "localhost";
-                //System.out.print("Enter gateway's IP: ");
-                //gatewayIP = scanner.next();
-                gatewayIP = "http://localhost:8080/restserver/gateway";
-                myNode = new Node(id, myIP, port);
 
-                try {
-                    registerNode(id, port, myIP);
-                } catch (InterruptedException | IOException e) {
-                    e.printStackTrace();
-                }
-
-                System.out.println("Enter 'exit' to exit..");
-                String exit = scanner.next();
-                while (!exit.equals("exit")) {
-                    if (exit.equals("nodes")) {
-                        System.out.println(NodesRing.getInstance().getNodes().toString());
-                    }
-                    exit = scanner.next();
-                }
-                tokenThread.interrupt();
-                deleteNode(id);
-            }
-        });
 
     }
 
@@ -101,11 +111,16 @@ public class NodeHandler {
         tokenThread.start();
     }
 
+    synchronized void stopThreads() {
+        NodesRing.getInstance().setStatus("exiting");
+        System.out.println(NodesRing.getInstance().getStatus());
+    }
+
     synchronized void insertStat(Measurement localStat) {
         Map<String, Measurement> tokenCopy = Token.getInstance().getMeasurements();
         tokenCopy.put(myNode.getId(), localStat);
         Token.getInstance().setMeasurements(tokenCopy);
-        System.out.println("INSERITA stat nel TOKEN--> " + Token.getInstance().toString());
+        System.out.println("Local stat inserted in Token --> " + Token.getInstance().toString());
 
     }
 
@@ -123,7 +138,7 @@ public class NodeHandler {
 
         String input = "{\"id\":\"" + id + "\",\"IP\":\"" + myIP + "\",\"port\":\"" + port + "\"}";
 
-        System.out.println(input);
+        System.out.println("New node, registering on Gateway .. " + input);
         ClientResponse response = webResource.type("application/json")
                 .post(ClientResponse.class, input);
 
@@ -137,7 +152,7 @@ public class NodeHandler {
         // NodesRing init
         List<Node> nodesList = new ArrayList<Node>();
         String output = response.getEntity(String.class);
-        System.out.println(output);
+        System.out.println("Gateway response : "  + output);
         JsonParser parser = new JsonParser();
         JsonArray array = parser.parse(output).getAsJsonObject()
                 .get("Nodes").getAsJsonArray();
@@ -153,10 +168,9 @@ public class NodeHandler {
         MessageHandlerGrpcClient.addNode(id,myIP,port);
 
 
-        System.out.println("Ring created -> " + NodesRing.getInstance().getNodes().toString());
+        System.out.println("Local Ring from Gateway created ---> " + NodesRing.getInstance().getNodes().toString());
 
-
-        runTokenThread();
+        System.out.println("Starting Measurements Simulator...");
         simulator = new PM10Simulator(StatsBuffer.getInstance());
         simulator.start();
 
@@ -164,6 +178,8 @@ public class NodeHandler {
     }
 
     synchronized void deleteNode(String id) {
+
+        System.out.println("Deleting node on Gateway..");
         Client client = Client.create();
 
         WebResource webResource = client
@@ -181,16 +197,15 @@ public class NodeHandler {
                     + response.getStatus());
         }
 
-        NodesRing.getInstance().removeNode(id);
-        MessageHandlerGrpcClient.removeNode(id);
-
         String output = response.getEntity(String.class);
         System.out.println(output);
 
+        System.out.println("Deleting node on Nodes..");
+        MessageHandlerGrpcClient.removeNode(id);
     }
 
-    synchronized void nextToken() {
-        System.out.println("Calcolo next token");
+    void nextToken() {
+        System.out.println("Setting next endpoint..");
         List<Node> nodesCopy = NodesRing.getInstance().getNodes();
         Node nextNode = new Node("", "", 0);
         for (int i = 0; i < nodesCopy.size(); i++) {
@@ -201,11 +216,10 @@ public class NodeHandler {
         }
         Token.getInstance().setNextIp(nextNode.getIP());
         Token.getInstance().setNextPort(nextNode.getPort());
-        Token.getInstance().setCurrentId(nextNode.getId());
-        System.out.println("next token -->" + nextNode.getId());
+        Token.getInstance().setNextId(nextNode.getId());
     }
 
-    synchronized Measurement getAvg() {
+    Measurement getAvg() {
         Map<String, Measurement> statsCopy = Token.getInstance().getMeasurements();
         long lastTimestamp = statsCopy.get(myNode.getId()).getTimestamp();
         String lastType = statsCopy.get(myNode.getId()).getType();
@@ -223,7 +237,7 @@ public class NodeHandler {
 
         Measurement globalMeasurement = getAvg();
 
-        System.out.println("All nodes stats found, sending global stat to gateway...");
+        System.out.println("All Local Stats found, sending a Global Stat to Gateway...");
 
         Client client = Client.create();
 
@@ -235,7 +249,7 @@ public class NodeHandler {
                 + globalMeasurement.getValue() + "\", \"timestamp\":\"" + globalMeasurement.getTimestamp() + "\", \"id\":\""
                 + globalMeasurement.getId() + "\",\"type\":\"" + globalMeasurement.getType() + "\" }";
 
-        System.out.println(input);
+        System.out.println("Request to Gateway : " + input);
         ClientResponse response = webResource.type("application/json")
                 .post(ClientResponse.class, input);
 
@@ -248,7 +262,7 @@ public class NodeHandler {
         }
 
         String output = response.getEntity(String.class);
-        System.out.println(output);
+        System.out.println("Response from gateway: " + output);
         // Clear token stats list
         Token.getInstance().getMeasurements().clear();
 

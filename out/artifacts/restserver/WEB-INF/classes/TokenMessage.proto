@@ -1,15 +1,18 @@
 syntax = "proto3";
 option java_package = "com.grpc";
 
-service TokenHandler{
+service MessageHandler{
   rpc HandleToken (TokenMessage) returns (TokenResponse);
+  rpc AddNode (NewNodeMessage) returns (NewNodeResponse);
+  rpc RemoveNode (RemoveNodeMessage) returns (RemoveNodeResponse);
 }
 
 message TokenMessage {
 
   string currentId = 1;
+  string nextId = 2;
 
-  map<string, MeasurementMessage> measurements = 2;
+  map<string, MeasurementMessage> measurements = 3;
   message MeasurementMessage {
     double value = 1;
     int64 timestamp = 2;
@@ -17,6 +20,30 @@ message TokenMessage {
   }
 
 
+}
+
+message NewNodeMessage {
+
+  string id = 1;
+  int32 port = 2;
+  string IP = 3;
+
+}
+
+message RemoveNodeMessage {
+
+  string id = 1;
+
+}
+
+message NewNodeResponse{
+  string status = 1;
+  string message = 2;
+}
+
+message RemoveNodeResponse{
+  string status = 1;
+  string message = 2;
 }
 
 message TokenResponse {

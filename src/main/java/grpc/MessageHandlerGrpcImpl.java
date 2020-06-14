@@ -17,7 +17,10 @@ public class MessageHandlerGrpcImpl extends MessageHandlerImplBase {
         System.out.println(request);
 
         Token.getInstance().setMeasurementsFromMessage(request.getMeasurementsMap());
+        Token.getInstance().setCurrentId(request.getNextId());
+        Token.getInstance().setNextId("");
 
+        System.out.println("New Token arrived --> "+Token.getInstance().toString());
 
         TokenResponse response = TokenResponse.newBuilder().setStatus("done").build();
 
@@ -30,9 +33,9 @@ public class MessageHandlerGrpcImpl extends MessageHandlerImplBase {
     public void addNode(NewNodeMessage request,
                             StreamObserver<NewNodeResponse> responseObserver) {
 
-        System.out.println(request);
+        System.out.println("Node registered --> "+ request);
 
-        NodesRing.getInstance().addNode(new Node(request.getId(),request.getIP(),request.getPort()));
+        addToRing(request.getId(),request.getIP(),request.getPort());
 
         NewNodeResponse response = NewNodeResponse.newBuilder().setStatus("done").build();
 
@@ -45,14 +48,22 @@ public class MessageHandlerGrpcImpl extends MessageHandlerImplBase {
     public void removeNode(RemoveNodeMessage request,
                             StreamObserver<RemoveNodeResponse> responseObserver) {
 
-        System.out.println(request);
+        System.out.println("Node removed --> " + request);
 
-        NodesRing.getInstance().removeNode(request.getId());
+        removeFromRing(request.getId());
 
         RemoveNodeResponse response = RemoveNodeResponse.newBuilder().setStatus("done").build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 
+    }
+
+    public synchronized void removeFromRing(String id){
+        NodesRing.getInstance().removeNode(id);
+    }
+
+    public synchronized void addToRing(String id, String IP, int port){
+        NodesRing.getInstance().addNode(new Node(id,IP,port));
     }
 }

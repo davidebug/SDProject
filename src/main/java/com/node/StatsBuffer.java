@@ -27,7 +27,6 @@ public class StatsBuffer implements Buffer {
     public synchronized void addMeasurement(Measurement m) {
         List<Measurement> statsCopy = stats;
         if(statsCopy.size() == slidingMaxSize) {
-            System.out.println("ARRIVATO A 12, calcolo AVG");
             localStat = getAvg();
             this.getInstance().notifyAll();
         }

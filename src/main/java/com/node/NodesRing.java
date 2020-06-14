@@ -7,12 +7,23 @@ import java.util.Collections;
 import java.util.List;
 
 public class NodesRing {
+
+    private String status;
     private List<Node> nodes = new ArrayList<Node>();
+
+    public synchronized String getStatus() {
+        return status;
+    }
+
+    public synchronized void setStatus(String status) {
+        this.status = status;
+    }
 
     private static NodesRing instance;
 
     private NodesRing() {
         this.nodes = new ArrayList<Node>();
+        status = "online";
     }
 
     public synchronized static NodesRing getInstance() {
@@ -20,7 +31,6 @@ public class NodesRing {
             instance = new NodesRing();
         return instance;
     }
-
     public List<Node> getNodes() {
         return nodes;
     }
