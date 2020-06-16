@@ -50,7 +50,7 @@ public class Gateway {
 
             if (toAdd != null) {
                 if (Stats.getInstance().add(toAdd)) {
-                    String response = "{ \"status\" : \"done\", \"newStat\" : \"" + toAdd.toString() + "\", \"Stats\" : " + Stats.getInstance().getStatsList().toString() + " }";
+                    String response = "{ \"status\" : \"done\", \"newStatInserted\" : \"" + toAdd.toString() + "\" }";
                     return Response.ok(response).build();
                 } else {
                     return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -90,22 +90,46 @@ public class Gateway {
     }
 
     @GET
-    @Path("/analist/nodes")
+    @Path("/analist")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response totalNodes() {
+    public Response totalNodes(@HeaderParam("type") String type) {
 
-          String  response = "{ \"status\" : \"done\",\"totalNodes\" : \"" + Nodes.getInstance().getNodesList().size() + "\"  }";
+        if (type.equals("nodes")) {
+            String response = "{ \"status\" : \"done\",\"totalNodes\" : \"" + Nodes.getInstance().getNodesList().size() + "\"  }";
             return Response.ok(response).build();
+        } else if (type.contains("stats")) {
+            String toParse = type.substring(type.indexOf(" ") + 1);
+            if (!toParse.equals("") && toParse != null) {
+                int number = Integer.parseInt(toParse);
+                String response;
+                if (number <= Stats.getInstance().getStatsList().size()) {
+                    response = "{ \"status\" : \"done\",\"lastStats\" : \"" + Stats.getInstance().lastStats(number).toString() + "\"  }";
+                } else {
+                    response = "{ \"status\" : \"err\",\"message\" : \" Not enough Stats in list, actual stats: " + Stats.getInstance().getStatsList().size() + " \"  }";
+                }
 
-    }
+                return Response.ok(response).build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } else if (type.contains("infos")) {
+            String toParse = type.substring(type.indexOf(" ") + 1);
+            if (!toParse.equals("") && toParse != null) {
+                int number = Integer.parseInt(toParse);
+                String response;
+                if (number <= Stats.getInstance().getStatsList().size()) {
+                    response = "{ \"status\" : \"done\",\"StdDev\" : \"" + Stats.getInstance().stdDev(number) + "\",\"AVG\" : \"" + Stats.getInstance().average(number) + "\"  }";
+                }
+                else {
+                        response = "{ \"status\" : \"err\",\"message\" : \" Not enough Stats in list, actual stats: " + Stats.getInstance().getStatsList().size() + " \"  }";
+                    }
+                return Response.ok(response).build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST).build();
 
-    @GET
-    @Path("/analist/laststats")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response lastStats(@HeaderParam("n") int n) {
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
-        String  response = "{ \"status\" : \"done\",\"totalNodes\" : \"" + Stats.getInstance().lastStats(n).toString() + "\"  }";
-        return Response.ok(response).build();
 
     }
 }

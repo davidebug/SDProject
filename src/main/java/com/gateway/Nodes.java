@@ -44,7 +44,7 @@ public class Nodes {
 
     public synchronized boolean add(Node toAdd){
 
-        List<Node> nodesCopy = getNodesList();
+        List<Node> nodesCopy = new ArrayList<>(getNodesList());
         for(Node n: nodesCopy){
             if(n.getId().toLowerCase().equals(toAdd.getId().toLowerCase())){
                 return false;
@@ -59,7 +59,7 @@ public class Nodes {
 
     public synchronized boolean remove(String id){
 
-        List<Node> nodesCopy = getNodesList();
+        List<Node> nodesCopy = new ArrayList<>(getNodesList());
         for(Node n: nodesCopy) {
             if (n.getId().toLowerCase().equals(id.toLowerCase())) {
                 nodesCopy.remove(n);
@@ -75,7 +75,7 @@ public class Nodes {
 
 
 
-    public Node getById(String id){
+    public synchronized Node getById(String id){
 
         List<Node> nodesCopy = getNodesList();
 

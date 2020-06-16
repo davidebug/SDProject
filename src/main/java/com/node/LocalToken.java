@@ -4,16 +4,17 @@ import PM10.Measurement;
 import com.google.gson.Gson;
 
 import com.grpc.TokenMessageOuterClass;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class Token {
+public class LocalToken {
     String nextIp;
     int nextPort;
     String currentId;
     String nextId;
+    private static LocalToken instance;
+    Map<String, Measurement> measurements;
 
     public synchronized String getNextId() {
         return nextId;
@@ -23,12 +24,10 @@ public class Token {
         this.nextId = nextId;
     }
 
-    private static Token instance;
-    Map<String, Measurement> measurements;
 
-    public synchronized static Token getInstance() {
+    public synchronized static LocalToken getInstance() {
         if (instance == null)
-            instance = new Token();
+            instance = new LocalToken();
         return instance;
     }
 
@@ -50,6 +49,14 @@ public class Token {
         return nextIp;
     }
 
+    public synchronized void reset() {
+        measurements.clear();
+        currentId = "";
+        nextId = "";
+        nextIp = "";
+        nextPort = 0;
+    }
+
     public synchronized String getCurrentId() {
         return currentId;
     }
@@ -57,6 +64,7 @@ public class Token {
     public synchronized void setNextIp(String nextIp) {
         this.nextIp = nextIp;
     }
+
     public synchronized void setCurrentId(String currentId) {
         this.currentId = currentId;
     }
@@ -69,32 +77,32 @@ public class Token {
         this.nextPort = nextPort;
     }
 
-    public synchronized Map<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage> getMeasurementMessage(){
+    public synchronized Map<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage> getMeasurementMessage() {
         Map<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage> messageMap = new HashMap<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage>();
-        for(Map.Entry<String,Measurement> entry: getMeasurements().entrySet()){
+        for (Map.Entry<String, Measurement> entry : getMeasurements().entrySet()) {
             Measurement m = entry.getValue();
-            if(m != null) {
+            if (m != null) {
                 TokenMessageOuterClass.TokenMessage.MeasurementMessage measurement =
                         TokenMessageOuterClass.TokenMessage.MeasurementMessage.newBuilder().setValue(m.getValue()).setTimestamp(m.getTimestamp()).build();
-                messageMap.put(entry.getKey(),measurement);
+                messageMap.put(entry.getKey(), measurement);
             }
         }
         return messageMap;
     }
 
-    public synchronized  void setMeasurementsFromMessage(Map<String,TokenMessageOuterClass.TokenMessage.MeasurementMessage> messageMap){
-        Map<String,Measurement> map = new HashMap<String,Measurement>();
-        for(Map.Entry<String,TokenMessageOuterClass.TokenMessage.MeasurementMessage> entry: messageMap.entrySet()){
+    public synchronized void setMeasurementsFromMessage(Map<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage> messageMap) {
+        Map<String, Measurement> map = new HashMap<String, Measurement>();
+        for (Map.Entry<String, TokenMessageOuterClass.TokenMessage.MeasurementMessage> entry : messageMap.entrySet()) {
             TokenMessageOuterClass.TokenMessage.MeasurementMessage m = entry.getValue();
-            if(m != null) {
-                Measurement measurement = new Measurement("","",m.getValue(), m.getTimestamp());
-                map.put(entry.getKey(),measurement);
+            if (m != null) {
+                Measurement measurement = new Measurement("", "", m.getValue(), m.getTimestamp());
+                map.put(entry.getKey(), measurement);
             }
         }
         setMeasurements(map);
     }
 
-    Token(){
+    LocalToken() {
         measurements = new HashMap<String, Measurement>();
         nextIp = "";
         nextPort = 0;

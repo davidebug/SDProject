@@ -42,7 +42,7 @@ public class Stats {
 
     public synchronized boolean add(Measurement toAdd) {
 
-        List<Measurement> statsCopy = getStatsList();
+        List<Measurement> statsCopy = new ArrayList<>(getStatsList());
         statsCopy.add(toAdd);
         setStatsList(statsCopy);
         return true;
@@ -55,14 +55,45 @@ public class Stats {
 
         List<Measurement> statsCopy = getStatsList();
         List<Measurement> lastStats = new ArrayList<Measurement>();
-        for (int i = statsCopy.size(); i > statsCopy.size() - n; i--) {
-            lastStats.add(statsCopy.get(i));
-        }
+            for (int i = statsCopy.size()-1; i > (statsCopy.size() - n)-1; i--) {
+                lastStats.add(statsCopy.get(i));
+            }
         return lastStats;
     }
 
- // TODO: public synchronized int average(){}
- // TODO: public synchronized int stdDev(){
+    public synchronized double average(int n){
+        List<Measurement> lastStats = lastStats(n);
+        if(lastStats.size() == 0)
+            return 0;
+        double sum = 0;
+        for (int i = 0; i < lastStats.size(); i++) {
+            sum += lastStats.get(i).getValue();
+        }
 
+        return sum/lastStats.size();
+    }
+
+    public synchronized double stdDev(int n) {
+        List<Measurement> lastStats = lastStats(n);
+
+        if(lastStats.size() == 0)
+            return 0;
+        double sum = 0;
+        double newSum = 0;
+
+        for (int i = 0; i < lastStats.size(); i++) {
+            sum += lastStats.get(i).getValue();
+        }
+        double mean = sum/ lastStats.size();
+
+        for (int j = 0; j < lastStats.size(); j++) {
+            // put the calculation right in there
+            newSum += ((lastStats.get(j).getValue() - mean) * (lastStats.get(j).getValue()));
+        }
+        double squaredDiffMean = newSum / lastStats.size();
+        double standardDev = Math.sqrt(squaredDiffMean);
+
+        return standardDev;
+    }
 }
 

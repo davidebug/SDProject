@@ -2,25 +2,25 @@ package grpc;
 
 import com.models.Node;
 import com.node.NodesRing;
-import com.node.Token;
+import com.node.LocalToken;
 import io.grpc.stub.StreamObserver;
 
 import com.grpc.MessageHandlerGrpc.MessageHandlerImplBase;
 import com.grpc.TokenMessageOuterClass.*;
 
-public class MessageHandlerGrpcImpl extends MessageHandlerImplBase {
+public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
 
     @Override
     public void handleToken(TokenMessage request,
                           StreamObserver<TokenResponse> responseObserver) {
 
-        System.out.println(request);
+        System.out.println("New Token arrived from -->"+ request.getCurrentId());
 
-        Token.getInstance().setMeasurementsFromMessage(request.getMeasurementsMap());
-        Token.getInstance().setCurrentId(request.getNextId());
-        Token.getInstance().setNextId("");
+        LocalToken.getInstance().setMeasurementsFromMessage(request.getMeasurementsMap());
+        LocalToken.getInstance().setCurrentId(request.getNextId());
+        LocalToken.getInstance().setNextId("");
 
-        System.out.println("New Token arrived --> "+Token.getInstance().toString());
+        System.out.println("Current ID setted --> "+ request.getNextId());
 
         TokenResponse response = TokenResponse.newBuilder().setStatus("done").build();
 
@@ -37,7 +37,7 @@ public class MessageHandlerGrpcImpl extends MessageHandlerImplBase {
 
         addToRing(request.getId(),request.getIP(),request.getPort());
 
-        NewNodeResponse response = NewNodeResponse.newBuilder().setStatus("done").build();
+        NewNodeResponse response = NewNodeResponse.newBuilder().setStatus(NodesRing.getInstance().getStatus()).build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

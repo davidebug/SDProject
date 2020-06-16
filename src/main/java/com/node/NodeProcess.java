@@ -25,7 +25,7 @@ public class NodeProcess {
             nodeHandler.setGatewayIP("http://localhost:8080/restserver/gateway");
             nodeHandler.setMyNode(new Node(id, myIP, port));
             try {
-                nodeHandler.registerNode(id, port, myIP);
+                nodeHandler.registerNode();
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }

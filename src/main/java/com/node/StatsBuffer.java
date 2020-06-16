@@ -23,15 +23,22 @@ public class StatsBuffer implements Buffer {
         return instance;
     }
 
+    public synchronized  void setLocalStat(Measurement localStat) {
+        this.localStat = localStat;
+    }
+
     @Override
     public synchronized void addMeasurement(Measurement m) {
         List<Measurement> statsCopy = stats;
+        statsCopy.add(m);
         if(statsCopy.size() == slidingMaxSize) {
             localStat = getAvg();
+            System.out.println("Local Stat ready - Notify --> " + localStat.toString());
             this.getInstance().notifyAll();
+            slide();
+        }else {
+            stats = statsCopy;
         }
-        statsCopy.add(m);
-        stats = statsCopy;
         //System.out.println(m.toString());
     }
 
@@ -43,16 +50,27 @@ public class StatsBuffer implements Buffer {
         return localStat;
     }
 
+    public synchronized List<Measurement> getStats() {
+        return stats;
+    }
+
+    public void setStats(List<Measurement> stats) {
+        this.stats = stats;
+    }
+
     public synchronized  void reset(){
+        localStat = null;
+    }
+
+    public synchronized  void slide(){
         List<Measurement> statsCopy = stats;
         for(int i = 0; i < slidingMaxSize/2; i++)
             statsCopy.remove(i);
         stats = statsCopy;
-        localStat = null;
     }
 
     public synchronized Measurement getAvg(){
-        List<Measurement> statsCopy = stats;
+        List<Measurement> statsCopy = getStats();
         long lastTimestamp = statsCopy.get(statsCopy.size()-1).getTimestamp();
         String lastType = statsCopy.get(statsCopy.size()-1).getType();
         String lastId = statsCopy.get(statsCopy.size()-1).getId();

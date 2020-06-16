@@ -1,68 +1,58 @@
 package com.analist;// Save file as Client.java
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import com.models.Node;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class AnalistClient
 {
-    final static int ServerPort = 1234;
 
     public static void main(String args[]) throws UnknownHostException, IOException
     {
         final Scanner scn = new Scanner(System.in);
+        final String gatewayIP = "http://localhost:8080/restserver/gateway";
+        Client client = Client.create();
+        WebResource webResource = client
+                .resource(gatewayIP + "/analist");
+        System.out.println("Type 'exit' to exit\nType 'nodes' to view the number of nodes\nType 'stats [N]' to see last N stats\n" +
+                "Type 'infos [N]' to see Std Dev and Avg of last N stats");
+        String input = scn.nextLine();
 
-        // getting localhost ip
-        InetAddress ip = InetAddress.getByName("localhost");
+        ClientResponse response;
+        while(!input.equals("exit")){
+            if(input.equals("nodes") || Pattern.matches("^stats [1-9][0-9]?$|^100$",input)|| Pattern.matches("^infos [1-9][0-9]?$|^100$",input)){
+                response = webResource.header("type", input)
+                        .get(ClientResponse.class);
 
-        // establish the connection
-        Socket s = new Socket(ip, ServerPort);
-
-        // obtaining input and out streams
-        final DataInputStream dis = new DataInputStream(s.getInputStream());
-        final DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-
-        // sendMessage thread
-        Thread sendMessage = new Thread(new Runnable()
-        {
-            @Override
-            public void run() {
-                while (true) {
-
-                    // read the message to deliver.
-                    String msg = scn.nextLine();
-
-                    try {
-                        // write on the output stream
-                        dos.writeUTF(msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (response.getStatus() != 412 && response.getStatus() != 200) {
+                    throw new RuntimeException("Server unreachable or invalid parameters - "
+                            + response.getStatus());
+                } else if (response.getStatus() == 412) {
+                    throw new RuntimeException("Error in receiving datas - "
+                            + response.getStatus());
+                }else{
+                    String output = response.getEntity(String.class);
+                    System.out.println(output);
                 }
             }
-        });
-
-        // readMessage thread
-        Thread readMessage = new Thread(new Runnable()
-        {
-            @Override
-            public void run() {
-
-                while (true) {
-                    try {
-                        // read the message sent to this client
-                        String msg = dis.readUTF();
-                        System.out.println(msg);
-                    } catch (IOException e) {
-
-                        e.printStackTrace();
-                    }
-                }
+            else{
+                System.out.println("Invalid parameters");
             }
-        });
 
-        sendMessage.start();
-        readMessage.start();
+            input = scn.nextLine();
+        }
+
 
     }
 }
