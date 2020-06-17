@@ -20,6 +20,7 @@ public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
         LocalToken.getInstance().setCurrentId(request.getNextId());
         LocalToken.getInstance().setNextId("");
 
+
         System.out.println("Current ID setted --> "+ request.getNextId());
 
         TokenResponse response = TokenResponse.newBuilder().setStatus("done").build();

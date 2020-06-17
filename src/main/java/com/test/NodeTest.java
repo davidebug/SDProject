@@ -8,6 +8,8 @@ import com.node.StatsBuffer;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NodeTest {
 
@@ -28,7 +30,16 @@ public class NodeTest {
         nodeHandler1.runTokenThread();
         System.out.println("Starting Measurements Simulator...");
 
+      /*  TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                nodeHandler1.removeNode();
+            }
+        };
+
+        new Timer().schedule(task,102300);*/
     }
+
 
 
 

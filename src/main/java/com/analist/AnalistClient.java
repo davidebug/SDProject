@@ -25,7 +25,7 @@ public class AnalistClient
         Client client = Client.create();
         WebResource webResource = client
                 .resource(gatewayIP + "/analist");
-        System.out.println("Type 'exit' to exit\nType 'nodes' to view the number of nodes\nType 'stats [N]' to see last N stats\n" +
+        //System.out.println("Type 'exit' to exit\nType 'nodes' to view the number of nodes\nType 'stats [N]' to see last N stats\n" +
                 "Type 'infos [N]' to see Std Dev and Avg of last N stats");
         String input = scn.nextLine();
 

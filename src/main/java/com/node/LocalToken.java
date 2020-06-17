@@ -67,6 +67,7 @@ public class LocalToken {
 
     public synchronized void setCurrentId(String currentId) {
         this.currentId = currentId;
+        this.getInstance().notifyAll();
     }
 
     public synchronized int getNextPort() {

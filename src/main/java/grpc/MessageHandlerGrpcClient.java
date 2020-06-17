@@ -112,8 +112,8 @@ public class MessageHandlerGrpcClient {
                                 server.shutdownNow();
                                 NodesRing.getInstance().setStatus("exiting");
                                 System.out.println("Terminating process...");
-                                synchronized (StatsBuffer.getInstance()) {
-                                    StatsBuffer.getInstance().notifyAll();
+                                synchronized (LocalToken.getInstance()) {
+                                    LocalToken.getInstance().notifyAll();
                                 }
                             }
                         }
@@ -126,8 +126,8 @@ public class MessageHandlerGrpcClient {
                                 server.shutdownNow();
                                 NodesRing.getInstance().setStatus("exiting");
                                 System.out.println("Terminating process...");
-                                synchronized (StatsBuffer.getInstance()) {
-                                    StatsBuffer.getInstance().notifyAll();
+                                synchronized (LocalToken.getInstance()) {
+                                    LocalToken.getInstance().notifyAll();
                                 }
                             }
                         }
@@ -144,8 +144,8 @@ public class MessageHandlerGrpcClient {
             server.shutdownNow();
             NodesRing.getInstance().setStatus("exiting");
             System.out.println("Terminating process...");
-            synchronized (StatsBuffer.getInstance()) {
-                StatsBuffer.getInstance().notifyAll();
+            synchronized (LocalToken.getInstance()) {
+                LocalToken.getInstance().notifyAll();
             }
         }
     }
@@ -153,6 +153,7 @@ public class MessageHandlerGrpcClient {
     static ManagedChannel setTokenRequest(String currentId) {
         System.out.println("Setting next endpoint..");
         Node nextNode = NodesRing.getInstance().getNextNode(currentId);
+        System.out.println("NEXT NODE --> " +  nextNode.toString());
         LocalToken.getInstance().setNextIp(nextNode.getIP());
         LocalToken.getInstance().setNextPort(nextNode.getPort());
         LocalToken.getInstance().setNextId(nextNode.getId());

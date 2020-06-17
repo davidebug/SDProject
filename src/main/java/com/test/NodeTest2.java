@@ -5,6 +5,8 @@ import com.node.NodeHandler;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NodeTest2 {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -22,6 +24,13 @@ public class NodeTest2 {
         nodeHandler1.runInputThread();
         nodeHandler1.runTokenThread();
 
+      /*  TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                nodeHandler1.removeNode();
+            }
+        };
 
+        new Timer().schedule(task,102300);*/
     }
 }

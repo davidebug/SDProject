@@ -33,8 +33,7 @@ public class StatsBuffer implements Buffer {
         statsCopy.add(m);
         if(statsCopy.size() == slidingMaxSize) {
             localStat = getAvg();
-            System.out.println("Local Stat ready - Notify --> " + localStat.toString());
-            this.getInstance().notifyAll();
+            System.out.println("Local Stat ready --> " + localStat.toString());
             slide();
         }else {
             stats = statsCopy;

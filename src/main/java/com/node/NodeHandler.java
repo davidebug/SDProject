@@ -4,6 +4,7 @@ import PM10.Measurement;
 import PM10.PM10Simulator;
 import PM10.Simulator;
 import com.gateway.Nodes;
+import com.gateway.Stats;
 import com.grpc.TokenMessageOuterClass;
 import com.models.Node;
 import com.google.gson.Gson;
@@ -70,43 +71,50 @@ public class NodeHandler {
             public void run() {
                 System.out.println("Init listener on Local Stat...");
                 while (NodesRing.getInstance().getStatus().equals("online") || NodesRing.getInstance().getStatus().equals("elaborating")) {
-                    if (LocalToken.getInstance().getCurrentId().equals(NodesRing.getInstance().getMyNode().getId()) || NodesRing.getInstance().getNodes().size() < 2) {
-                        NodesRing.getInstance().setStatus("elaborating");
-                        System.out.println("Waiting for Local Stat...");
-                        try {
-                            synchronized (StatsBuffer.getInstance()) {
-                                while (StatsBuffer.getInstance().getLocalStat() == null && NodesRing.getInstance().getStatus().equals("elaborating"))
-                                    StatsBuffer.getInstance().wait();
+
+                    synchronized (LocalToken.getInstance()) {
+                        while (!haveToken() && NodesRing.getInstance().getNodes().size() > 1
+                        && !NodesRing.getInstance().getStatus().equals("exiting")) {
+                            try {
+                                System.out.println("Waiting for Token...");
+                                LocalToken.getInstance().wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
-                        if(NodesRing.getInstance().getNodes().size() < 2 && NodesRing.getInstance().getStatus().equals("elaborating")) {
+                    }
+                    if(NodesRing.getInstance().getStatus().equals("exiting")){
+                        break;
+                    }else if(NodesRing.getInstance().getStatus().equals("online"))
+                        NodesRing.getInstance().setStatus("elaborating");
 
+                    if (StatsBuffer.getInstance().getLocalStat() != null) {
+
+                        if(NodesRing.getInstance().getNodes().size() < 2) {
                            insertStat();
                             System.out.println("Local Stat Inserted");
                            sendGlobalStat();
-                           LocalToken.getInstance().setCurrentId(NodesRing.getInstance().getMyNode().getId());
                             System.out.println("Resetting and Recalculating Local stat ...");
                            LocalToken.getInstance().reset();
                            StatsBuffer.getInstance().reset();
                         }
-                        else if(NodesRing.getInstance().getStatus().equals("elaborating")){
+                        else{
 
                             insertStat();
                             System.out.println("Local Stat Inserted");
                             if (globalStatsCondition())
                                 sendGlobalStat();
-                            LocalToken.getInstance().setCurrentId(NodesRing.getInstance().getMyNode().getId());
-                            MessageHandlerGrpcClient.sendToken(LocalToken.getInstance().getCurrentId());
+                            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
                             System.out.println("Resetting Local stat ...");
                             LocalToken.getInstance().reset();
                             StatsBuffer.getInstance().reset();
-                            System.out.println("Waiting for token...");
                         }
-                        else
-                            break;
+
+                    }
+                    else if(NodesRing.getInstance().getNodes().size() > 1){
+                        System.out.println("Local Stat NOT ready - Sending token..");
+                        MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
+                        LocalToken.getInstance().reset();
                     }
                 }
                 System.out.println("Token Thread terminated");
@@ -151,6 +159,9 @@ public class NodeHandler {
 
     }
 
+    public boolean haveToken(){
+       return LocalToken.getInstance().getCurrentId().equals(NodesRing.getInstance().getMyNode().getId());
+    }
 
     public void runInputThread() {
         inputThread.start();
@@ -230,9 +241,8 @@ public class NodeHandler {
         System.out.println(output);
 
         System.out.println("Deleting node on Nodes..");
-        if(NodesRing.getInstance().getNodes().size() > 1) {
-            LocalToken.getInstance().setCurrentId(NodesRing.getInstance().getMyNode().getId());
-            MessageHandlerGrpcClient.sendToken(LocalToken.getInstance().getCurrentId());
+        if(NodesRing.getInstance().getNodes().size() > 1 && haveToken()) {
+            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
         }
         MessageHandlerGrpcClient.removeNode(id, server);
     }
