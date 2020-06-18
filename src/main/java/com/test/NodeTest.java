@@ -30,14 +30,14 @@ public class NodeTest {
         nodeHandler1.runTokenThread();
         System.out.println("Starting Measurements Simulator...");
 
-      /*  TimerTask task = new TimerTask() {
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 nodeHandler1.removeNode();
             }
         };
 
-        new Timer().schedule(task,102300);*/
+        new Timer().schedule(task,50000);
     }
 
 

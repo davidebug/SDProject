@@ -21,16 +21,31 @@ public class NodeTest2 {
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
-        nodeHandler1.runInputThread();
+          nodeHandler1.runInputThread();
         nodeHandler1.runTokenThread();
 
-      /*  TimerTask task = new TimerTask() {
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 nodeHandler1.removeNode();
             }
         };
 
-        new Timer().schedule(task,102300);*/
+      /*  TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    nodeHandler1.registerNode();
+                    nodeHandler1.runInputThread();
+                    nodeHandler1.runTokenThread();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };*/
+
+        new Timer().schedule(task,50000);
     }
 }

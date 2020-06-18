@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MessageHandlerGrpcClient {
 
-    public static void sendToken(String currentId) {
+    public static void sendToken(String currentId, Server server) {
 
 
         final ManagedChannel channel = setTokenRequest(currentId);
@@ -28,19 +28,23 @@ public class MessageHandlerGrpcClient {
 
         TokenMessage request = TokenMessage.newBuilder().putAllMeasurements(LocalToken.getInstance().getMeasurementMessage()).
                 setCurrentId(LocalToken.getInstance().getCurrentId()).setNextId(LocalToken.getInstance().getNextId()).build();
-        System.out.println("Sending token  --> " + LocalToken.getInstance().toString());
+        //System.out.println("Sending token  --> " + LocalToken.getInstance().toString());
 
         stub.handleToken(request, new StreamObserver<TokenResponse>() {
             @Override
             public void onNext(TokenResponse tokenResponse) {
-                System.out.println(tokenResponse.getStatus());
-                NodesRing.getInstance().setStatus("elaborating");
+            //    System.out.println(tokenResponse.getStatus());
+                if(!NodesRing.getInstance().getStatus().equals("exiting"))
+                    NodesRing.getInstance().setStatus("elaborating");
+                else{
+                    MessageHandlerGrpcClient.removeNode(currentId, server);
+                }
             }
 
             @Override
             public void onError(Throwable throwable) {
-                System.out.println("Error on next token message: " + throwable.getMessage());
-                sendToken(NodesRing.getInstance().getNextNode(currentId).getId());
+            //    System.out.println("Error on next token : " + throwable.getMessage());
+                sendToken(NodesRing.getInstance().getNextNode(currentId).getId(), server);
             }
 
             @Override
@@ -51,10 +55,9 @@ public class MessageHandlerGrpcClient {
 
     }
 
-    public static void addNode(String id, String IP, int port) {
-        List<Node> nodesCopy = NodesRing.getInstance().getNodes();
+    public static void addNode(String id, String IP, int port, Server server) {
         final List<String> responses = new ArrayList<>();
-        for (Node n : nodesCopy) {
+        for (Node n : NodesRing.getInstance().getNodes()) {
             if (!n.getId().equals(id)) {
                 final ManagedChannel channel = ManagedChannelBuilder.forTarget(n.getIP() + ":" + n.getPort()).usePlaintext(true).build();
 
@@ -67,10 +70,11 @@ public class MessageHandlerGrpcClient {
                     public void onNext(NewNodeResponse newNodeResponse) {
                         System.out.println("Added on node: " + n.getId()+ " - With status: "+ newNodeResponse.getStatus());
                         responses.add(newNodeResponse.getStatus());
-                        if (responses.size() == nodesCopy.size()-1 && !responses.contains("elaborating")) {
-                            if(nodesCopy.get(0).getId().equals(id)) {
+                        System.out.println("Nodes count: " + NodesRing.getInstance().getNodes().size());
+                        if (responses.size() == NodesRing.getInstance().getNodes().size()-1 && !responses.contains("elaborating")) {
+                            if(NodesRing.getInstance().getNodes().get(0).getId().equals(id)) {
                                 NodesRing.getInstance().setStatus("elaborating");
-                                sendToken(NodesRing.getInstance().getMyNode().getId());
+                                sendToken(NodesRing.getInstance().getMyNode().getId(), server);
                             }
                         }
                     }
@@ -78,6 +82,19 @@ public class MessageHandlerGrpcClient {
                     @Override
                     public void onError(Throwable throwable) {
                         System.out.println("Impossible to add on " + n.getId());
+                        NodesRing.getInstance().removeNode(n.getId());
+                        System.out.println("Removed, Nodes count: " + NodesRing.getInstance().getNodes().size());
+                        if(NodesRing.getInstance().getNodes().size() == 1){
+                            synchronized (LocalToken.getInstance()) {
+                                LocalToken.getInstance().notifyAll();
+                            }
+                        }
+                        else if (responses.size() == NodesRing.getInstance().getNodes().size()-1 && !responses.contains("elaborating")) {
+                            if(NodesRing.getInstance().getNodes().get(0).getId().equals(id)) {
+                                NodesRing.getInstance().setStatus("elaborating");
+                                sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+                            }
+                        }
                     }
 
                     @Override
@@ -151,9 +168,9 @@ public class MessageHandlerGrpcClient {
     }
 
     static ManagedChannel setTokenRequest(String currentId) {
-        System.out.println("Setting next endpoint..");
+       // System.out.println("Setting next endpoint..");
         Node nextNode = NodesRing.getInstance().getNextNode(currentId);
-        System.out.println("NEXT NODE --> " +  nextNode.toString());
+        // System.out.println("NEXT NODE --> " +  nextNode.toString());
         LocalToken.getInstance().setNextIp(nextNode.getIP());
         LocalToken.getInstance().setNextPort(nextNode.getPort());
         LocalToken.getInstance().setNextId(nextNode.getId());

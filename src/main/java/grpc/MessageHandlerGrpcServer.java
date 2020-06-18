@@ -14,14 +14,14 @@ public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
     public void handleToken(TokenMessage request,
                           StreamObserver<TokenResponse> responseObserver) {
 
-        System.out.println("New Token arrived from -->"+ request.getCurrentId());
+        //System.out.println("New Token arrived from -->"+ request.getCurrentId());
 
         LocalToken.getInstance().setMeasurementsFromMessage(request.getMeasurementsMap());
         LocalToken.getInstance().setCurrentId(request.getNextId());
-        LocalToken.getInstance().setNextId("");
 
 
-        System.out.println("Current ID setted --> "+ request.getNextId());
+
+      //  System.out.println("Current ID setted --> "+ request.getNextId());
 
         TokenResponse response = TokenResponse.newBuilder().setStatus("done").build();
 
@@ -37,7 +37,9 @@ public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
         System.out.println("Node registered --> "+ request);
 
         addToRing(request.getId(),request.getIP(),request.getPort());
-
+        synchronized (LocalToken.getInstance()) {
+            LocalToken.getInstance().notifyAll();
+        }
         NewNodeResponse response = NewNodeResponse.newBuilder().setStatus(NodesRing.getInstance().getStatus()).build();
 
         responseObserver.onNext(response);

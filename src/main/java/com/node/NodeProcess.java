@@ -17,12 +17,13 @@ public class NodeProcess {
             String id = scanner.next();
             System.out.print("Enter your port: ");
             int port = scanner.nextInt();
-            // System.out.print("Enter your ip: ");
-            // String myIP = scanner.next();
+            //System.out.print("Enter your ip: ");
+            //String myIP = scanner.next();
             String myIP = "localhost";
-            //System.out.print("Enter gateway's IP: ");
-            //gatewayIP = scanner.next();
-            nodeHandler.setGatewayIP("http://localhost:8080/restserver/gateway");
+            System.out.print("Enter gateway's IP: ");
+            String gatewayIP = scanner.next();
+            //String gatewayIP = "http://localhost:8080/restserver/gateway";
+            nodeHandler.setGatewayIP(gatewayIP);
             nodeHandler.setMyNode(new Node(id, myIP, port));
             try {
                 nodeHandler.registerNode();

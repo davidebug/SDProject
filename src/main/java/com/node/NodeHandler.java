@@ -29,7 +29,7 @@ public class NodeHandler {
     Simulator simulator;
     Server server;
     String gatewayIP;
-
+    Client client;
 
     public String getGatewayIP() {
         return gatewayIP;
@@ -46,6 +46,8 @@ public class NodeHandler {
     }
 
     public NodeHandler() {
+
+        client = Client.create();
 
         inputThread = new Thread(new Runnable() {
             @Override
@@ -76,7 +78,7 @@ public class NodeHandler {
                         while (!haveToken() && NodesRing.getInstance().getNodes().size() > 1
                         && !NodesRing.getInstance().getStatus().equals("exiting")) {
                             try {
-                                System.out.println("Waiting for Token...");
+                                //System.out.println("Waiting for Token...");
                                 LocalToken.getInstance().wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -92,19 +94,19 @@ public class NodeHandler {
 
                         if(NodesRing.getInstance().getNodes().size() < 2) {
                            insertStat();
-                            System.out.println("Local Stat Inserted");
+                            System.out.println("Local Stat Inserted in Token");
                            sendGlobalStat();
-                            System.out.println("Resetting and Recalculating Local stat ...");
+                            System.out.println("Resetting Local stat ...");
                            LocalToken.getInstance().reset();
                            StatsBuffer.getInstance().reset();
                         }
                         else{
 
                             insertStat();
-                            System.out.println("Local Stat Inserted");
+                            System.out.println("Local Stat Inserted in Token");
                             if (globalStatsCondition())
                                 sendGlobalStat();
-                            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
+                            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
                             System.out.println("Resetting Local stat ...");
                             LocalToken.getInstance().reset();
                             StatsBuffer.getInstance().reset();
@@ -112,8 +114,8 @@ public class NodeHandler {
 
                     }
                     else if(NodesRing.getInstance().getNodes().size() > 1){
-                        System.out.println("Local Stat NOT ready - Sending token..");
-                        MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
+                       // System.out.println("Local Stat NOT ready - Sending token..");
+                        MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
                         LocalToken.getInstance().reset();
                     }
                 }
@@ -127,7 +129,7 @@ public class NodeHandler {
     }
 
 
-    public void removeNode(){
+    public synchronized void removeNode(){
         System.out.println("Terminating Simulator...");
         simulator.stopMeGently();
         deleteNode(NodesRing.getInstance().getMyNode().getId());
@@ -155,7 +157,6 @@ public class NodeHandler {
         Map<String, Measurement> tokenCopy = LocalToken.getInstance().getMeasurements();
         tokenCopy.put(NodesRing.getInstance().getMyNode().getId(), StatsBuffer.getInstance().getLocalStat());
         LocalToken.getInstance().setMeasurements(tokenCopy);
-        System.out.println("Local stat inserted in Token");
 
     }
 
@@ -168,18 +169,16 @@ public class NodeHandler {
     }
 
     public synchronized void registerNode() throws InterruptedException, IOException {
-        Client client = Client.create();
 
-        WebResource webResource = client
+        WebResource webResourceNodes = client
                 .resource(gatewayIP + "/nodes");
-
 
         String input = "{\"id\":\"" + NodesRing.getInstance().getMyNode().getId()
                 + "\",\"IP\":\"" + NodesRing.getInstance().getMyNode().getIP() + "\",\"port\":\"" + NodesRing.getInstance().getMyNode().getPort() + "\"}";
 
         System.out.println("New node, registering on Gateway .. ");
         System.out.println(input);
-        ClientResponse response = webResource.type("application/json")
+        ClientResponse response = webResourceNodes.type("application/json")
                 .post(ClientResponse.class, input);
 
         if (response.getStatus() != 412 && response.getStatus() != 200) {
@@ -206,7 +205,9 @@ public class NodeHandler {
 
         server = ServerBuilder.forPort(NodesRing.getInstance().getMyNode().getPort()).addService(new MessageHandlerGrpcServer()).build();
         server.start();
-        MessageHandlerGrpcClient.addNode(NodesRing.getInstance().getMyNode().getId(), NodesRing.getInstance().getMyNode().getIP(),NodesRing.getInstance().getMyNode().getPort());
+        MessageHandlerGrpcClient.addNode(NodesRing.getInstance().getMyNode().getId(), NodesRing.getInstance().getMyNode().getIP(),
+                NodesRing.getInstance().getMyNode().getPort(),
+                server);
 
 
         System.out.println("Local Ring from Gateway created ---> " + NodesRing.getInstance().getNodes().toString());
@@ -220,13 +221,10 @@ public class NodeHandler {
     synchronized void deleteNode(String id) {
 
         System.out.println("Deleting node on Gateway..");
-        Client client = Client.create();
-
-        WebResource webResource = client
+        WebResource webResourceNodes = client
                 .resource(gatewayIP + "/nodes");
 
-
-        ClientResponse response = webResource.header("id", id)
+        ClientResponse response = webResourceNodes.header("id", id)
                 .delete(ClientResponse.class);
 
         if (response.getStatus() != 412 && response.getStatus() != 200) {
@@ -242,9 +240,11 @@ public class NodeHandler {
 
         System.out.println("Deleting node on Nodes..");
         if(NodesRing.getInstance().getNodes().size() > 1 && haveToken()) {
-            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId());
+            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+            LocalToken.getInstance().reset();
+        }else {
+            MessageHandlerGrpcClient.removeNode(id, server);
         }
-        MessageHandlerGrpcClient.removeNode(id, server);
     }
 
 
@@ -267,19 +267,15 @@ public class NodeHandler {
 
         Measurement globalMeasurement = getAvg();
 
-        System.out.println("All Local Stats found, sending a Global Stat to Gateway...");
-
-        Client client = Client.create();
-
-        WebResource webResource = client
+        WebResource webResourceStats = client
                 .resource(gatewayIP + "/stats");
-
+        System.out.println("All Local Stats found, sending a Global Stat to Gateway...");
 
         String input = "{\"requestType\":\"globalStat\",\"from\":\"" + NodesRing.getInstance().getMyNode().getId() + "\",\"value\":\""
                 + globalMeasurement.getValue() + "\", \"timestamp\":\"" + globalMeasurement.getTimestamp() + "\", \"id\":\""
                 + globalMeasurement.getId() + "\",\"type\":\"" + globalMeasurement.getType() + "\" }";
 
-        ClientResponse response = webResource.type("application/json")
+        ClientResponse response = webResourceStats.type("application/json")
                 .post(ClientResponse.class, input);
 
         if (response.getStatus() != 412 && response.getStatus() != 200) {
@@ -291,7 +287,7 @@ public class NodeHandler {
         }
 
         String output = response.getEntity(String.class);
-        System.out.println("Response from gateway: " + output);
+        // System.out.println("Response from gateway: " + output);
         // Clear token
         LocalToken.getInstance().getMeasurements().clear();
 
