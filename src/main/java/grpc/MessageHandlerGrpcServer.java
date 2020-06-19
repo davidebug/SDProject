@@ -37,13 +37,15 @@ public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
         System.out.println("Node registered --> "+ request);
 
         addToRing(request.getId(),request.getIP(),request.getPort());
+
+        NewNodeResponse response = NewNodeResponse.newBuilder().setStatus(NodesRing.getInstance().getStatus()).build();
+
         synchronized (LocalToken.getInstance()) {
             LocalToken.getInstance().notifyAll();
         }
-        NewNodeResponse response = NewNodeResponse.newBuilder().setStatus(NodesRing.getInstance().getStatus()).build();
-
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+
 
     }
 
@@ -59,6 +61,9 @@ public class MessageHandlerGrpcServer extends MessageHandlerImplBase {
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+        synchronized (LocalToken.getInstance()) {
+            LocalToken.getInstance().notifyAll();
+        }
 
     }
 

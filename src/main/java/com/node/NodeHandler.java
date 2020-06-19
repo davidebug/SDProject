@@ -85,11 +85,17 @@ public class NodeHandler {
                             }
                         }
                     }
+
                     if(NodesRing.getInstance().getStatus().equals("exiting")){
                         break;
                     }else if(NodesRing.getInstance().getStatus().equals("online"))
                         NodesRing.getInstance().setStatus("elaborating");
 
+/*                    try {
+                        Thread.sleep(Long.MAX_VALUE);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }*/
                     if (StatsBuffer.getInstance().getLocalStat() != null) {
 
                         if(NodesRing.getInstance().getNodes().size() < 2) {
@@ -106,7 +112,7 @@ public class NodeHandler {
                             System.out.println("Local Stat Inserted in Token");
                             if (globalStatsCondition())
                                 sendGlobalStat();
-                            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+                            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server, false);
                             System.out.println("Resetting Local stat ...");
                             LocalToken.getInstance().reset();
                             StatsBuffer.getInstance().reset();
@@ -115,7 +121,7 @@ public class NodeHandler {
                     }
                     else if(NodesRing.getInstance().getNodes().size() > 1){
                        // System.out.println("Local Stat NOT ready - Sending token..");
-                        MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+                        MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server, false);
                         LocalToken.getInstance().reset();
                     }
                 }
@@ -240,7 +246,7 @@ public class NodeHandler {
 
         System.out.println("Deleting node on Nodes..");
         if(NodesRing.getInstance().getNodes().size() > 1 && haveToken()) {
-            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+            MessageHandlerGrpcClient.sendToken(NodesRing.getInstance().getMyNode().getId(), server, true);
             LocalToken.getInstance().reset();
         }else {
             MessageHandlerGrpcClient.removeNode(id, server);

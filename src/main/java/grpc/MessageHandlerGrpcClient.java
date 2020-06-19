@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MessageHandlerGrpcClient {
 
-    public static void sendToken(String currentId, Server server) {
+    public static void sendToken(String currentId, Server server, boolean removing) {
 
 
         final ManagedChannel channel = setTokenRequest(currentId);
@@ -34,7 +34,7 @@ public class MessageHandlerGrpcClient {
             @Override
             public void onNext(TokenResponse tokenResponse) {
             //    System.out.println(tokenResponse.getStatus());
-                if(!NodesRing.getInstance().getStatus().equals("exiting"))
+                if(!removing)
                     NodesRing.getInstance().setStatus("elaborating");
                 else{
                     MessageHandlerGrpcClient.removeNode(currentId, server);
@@ -44,7 +44,7 @@ public class MessageHandlerGrpcClient {
             @Override
             public void onError(Throwable throwable) {
             //    System.out.println("Error on next token : " + throwable.getMessage());
-                sendToken(NodesRing.getInstance().getNextNode(currentId).getId(), server);
+                sendToken(NodesRing.getInstance().getNextNode(currentId).getId(), server,removing);
             }
 
             @Override
@@ -74,7 +74,7 @@ public class MessageHandlerGrpcClient {
                         if (responses.size() == NodesRing.getInstance().getNodes().size()-1 && !responses.contains("elaborating")) {
                             if(NodesRing.getInstance().getNodes().get(0).getId().equals(id)) {
                                 NodesRing.getInstance().setStatus("elaborating");
-                                sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+                                sendToken(NodesRing.getInstance().getMyNode().getId(), server, false);
                             }
                         }
                     }
@@ -92,7 +92,7 @@ public class MessageHandlerGrpcClient {
                         else if (responses.size() == NodesRing.getInstance().getNodes().size()-1 && !responses.contains("elaborating")) {
                             if(NodesRing.getInstance().getNodes().get(0).getId().equals(id)) {
                                 NodesRing.getInstance().setStatus("elaborating");
-                                sendToken(NodesRing.getInstance().getMyNode().getId(), server);
+                                sendToken(NodesRing.getInstance().getMyNode().getId(), server, false);
                             }
                         }
                     }
